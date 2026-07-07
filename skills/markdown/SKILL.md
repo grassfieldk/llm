@@ -1,9 +1,7 @@
-
-# Markdown 記載ルール
-
-Markdown の書式に関する記載ルール集。
-Markdown 文書を作成する際に参照すること。
-
+---
+name: markdown
+description: Markdown の書式に関する記載ルール集。Markdown 文書を作成する際に参照すること。
+---
 
 ## サンプル Markdown
 
@@ -17,7 +15,7 @@ Markdown 文書を作成する際に参照すること。
 
 ### スタイル
 
-- GitHub Flavored Style で記載する
+- GitHub Flavored Markdown で記載する
 - 見出しは章や節のタイトルとしてのみ使用し、目立たせるためだけに見出しを使用しない
 - 見出しの下に水平線を引くなど、無意味な水平線を使用しない
 - コード、差分、ログ、設定ファイルの断片などはコードブロックを使用する
