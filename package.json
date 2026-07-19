@@ -1,0 +1,8 @@
+{
+  "private": true,
+  "scripts": {
+    "update": "bun scripts/update.mjs",
+    "update:anthropic": "bun scripts/update.mjs anthropic"
+  },
+  "devDependencies": { "playwright": "^1.61.1" }
+}

@@ -1,0 +1,7 @@
+[tasks.update]
+description = "全ソースのシステムプロンプトを更新"
+run = "bun run update"
+
+[tasks."update:anthropic"]
+description = "Anthropic のシステムプロンプトを更新"
+run = "bun run update:anthropic"
