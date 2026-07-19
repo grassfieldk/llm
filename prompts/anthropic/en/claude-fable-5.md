@@ -1,6 +1,7 @@
 ---
 provider: Anthropic
 model: Claude Fable 5
+language: en
 source: https://platform.claude.com/docs/en/release-notes/system-prompts
 ---
 

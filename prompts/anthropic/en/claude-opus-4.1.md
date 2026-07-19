@@ -1,6 +1,7 @@
 ---
 provider: Anthropic
 model: Claude Opus 4.1
+language: en
 source: https://platform.claude.com/docs/en/release-notes/system-prompts
 ---
 
