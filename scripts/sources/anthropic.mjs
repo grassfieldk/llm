@@ -8,30 +8,37 @@ for (const language of ["en", "ja"]) {
   const output = `prompts/anthropic/${language}`;
   const page = await browser.newPage();
   await page.goto(url, { waitUntil: "networkidle" });
-  await page.locator("#content-container").evaluate((article) => {
+  const article = page.locator("#content-container");
+  await article.evaluate((article) => {
     for (const button of article.querySelectorAll('button[aria-expanded="false"]')) button.click();
   });
-  await page.waitForTimeout(2500);
-  const models = await page.locator("h2").evaluateAll((headings) => headings.map((heading) => {
-    const name = heading.textContent.match(/Claude (?:Opus|Sonnet|Haiku|Fable) [0-9.]+/)?.[0] || "";
-    if (!name) return null;
-    const parts = [];
-    let sibling = heading.nextElementSibling;
-    while (sibling && sibling.tagName !== "H2") {
-      parts.push(sibling.innerText);
-      sibling = sibling.nextElementSibling;
-    }
-    return { name, text: parts.join("\n\n").trim() };
-  }).filter(Boolean));
-  await page.close();
-  if (!models.length) throw new Error(`${language} のモデルを取得できませんでした`);
-  for (const { name, text } of models) {
+  const models = await article.evaluate((article) => Array.from(article.querySelectorAll("a[href]"))
+    .map((link) => ({
+      name: link.textContent.match(/Claude (?:Opus|Sonnet|Haiku|Fable) [0-9.]+/)?.[0] || "",
+      url: link.href,
+    }))
+    .filter(({ name, url }) => name && new URL(url).pathname.includes("/release-notes/system-prompts/")));
+  if (!models.length) {
+    await page.close();
+    throw new Error(`${language} のモデル一覧を取得できませんでした`);
+  }
+
+  for (const { name, url: modelUrl } of models) {
+    await page.goto(modelUrl, { waitUntil: "networkidle" });
+    const modelArticle = page.locator("#content-container");
+    await modelArticle.evaluate((article) => {
+      for (const button of article.querySelectorAll('button[aria-expanded="false"]')) button.click();
+      article.querySelector("h1")?.remove();
+    });
+    const text = (await modelArticle.innerText()).trim();
+    if (!text) throw new Error(`${language} の ${name} のプロンプトを取得できませんでした`);
     const slug = name.toLowerCase().replaceAll(" ", "-") + ".md";
-    const body = `---\nprovider: Anthropic\nmodel: ${name}\nlanguage: ${language}\nsource: ${url}\n---\n\n${text}\n`;
+    const body = `---\nprovider: Anthropic\nmodel: ${name}\nlanguage: ${language}\nsource: ${modelUrl}\n---\n\n${text}\n`;
     await mkdir(output, { recursive: true });
     await writeFile(`${output}/${slug}`, body);
     console.log(`${language}: ${name} -> ${output}/${slug}`);
   }
+  await page.close();
 }
 
 await browser.close();

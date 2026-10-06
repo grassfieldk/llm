@@ -28,16 +28,22 @@ async function getWindowsHome() {
   const windowsWorkingDirectory = execFileSync("wslpath", ["-u", "C:\\Windows"], {
     encoding: "utf8",
   }).trim();
-  const windowsProfile = execFileSync(
-    "cmd.exe",
-    ["/c", "cd /d %USERPROFILE% && echo %USERPROFILE%"],
-    { cwd: windowsWorkingDirectory, encoding: "utf8" },
+  const encodedWindowsProfile = execFileSync(
+    "powershell.exe",
+    [
+      "-NoProfile",
+      "-NonInteractive",
+      "-Command",
+      "[Convert]::ToBase64String([Text.Encoding]::Unicode.GetBytes($env:USERPROFILE))",
+    ],
+    { cwd: windowsWorkingDirectory, encoding: "ascii" },
   ).trim();
 
-  if (!windowsProfile) {
+  if (!encodedWindowsProfile) {
     throw new Error("Windows のユーザーディレクトリを取得できません");
   }
 
+  const windowsProfile = Buffer.from(encodedWindowsProfile, "base64").toString("utf16le");
   return execFileSync("wslpath", ["-u", windowsProfile], {
     encoding: "utf8",
   }).trim();
